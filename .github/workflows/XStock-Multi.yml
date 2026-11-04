@@ -182,10 +182,8 @@ jobs:
             rm -f "$file"
           }
 
-          # Common patches
-          apply_patch "https://raw.githubusercontent.com/topnotchfreaks/kernel_patches/main/0001-gki-fixup.patch"
-
-          # Kernel-specific patches
+          # Patches (0001-gki-fixup.patch is already in extra_patches,
+          # so it is no longer applied separately to avoid double-apply rejects)
           echo '${{ toJSON(matrix.kernel.extra_patches) }}' | jq -r '.[]' | while read p; do
             [ -n "$p" ] && apply_patch "$p"
           done
@@ -219,7 +217,7 @@ jobs:
           sed -i '/ZRAM_DEF_COMP_LZO/d' "$CONFIG_FILE"
           echo "CONFIG_CRYPTO_LZ4=y" >> "$CONFIG_FILE"
           echo "CONFIG_KERNEL_LZ4=y" >> "$CONFIG_FILE"
-          echo "ZRAM_DEF_COMP_LZ4=y" >> "$CONFIG_FILE"
+          echo "CONFIG_ZRAM_DEF_COMP_LZ4=y" >> "$CONFIG_FILE"
 
       - name: '⚙️ Inject Reflex Governor'
         shell: bash
@@ -359,6 +357,21 @@ jobs:
         working-directory: ${{ env.KERNEL_LOC_DIR }}/${{ env.KERNEL_NAME }}
         run: |
           curl -sL "https://raw.githubusercontent.com/ravindu644/Droidspaces-OSS/refs/heads/main/Documentation/resources/kernel-patches/GKI/below-kernel-6.12/001.GKI-below-6.12-fix_sysvipc_kabi_6_7_8.patch" | git apply -v --ignore-whitespace
+
+      - name: "🚀 Enable Droidspaces kernel configs"
+        working-directory: ${{ env.KERNEL_LOC_DIR }}/${{ env.KERNEL_NAME }}
+        run: |
+          CONFIG_FILE="arch/arm64/configs/${{ env.DEFCONFIG_NAME }}"
+          for opt in \
+            SYSVIPC POSIX_MQUEUE IPC_NS PID_NS DEVTMPFS \
+            NETFILTER_XT_MATCH_ADDRTYPE USER_NS \
+            NETFILTER_XT_TARGET_REJECT NETFILTER_XT_TARGET_LOG NETFILTER_XT_MATCH_RECENT \
+            IP_SET IP_SET_HASH_IP IP_SET_HASH_NET NETFILTER_XT_SET \
+            TMPFS_POSIX_ACL TMPFS_XATTR
+          do
+            sed -i "/^# CONFIG_${opt} is not set/d;/^CONFIG_${opt}=/d" "$CONFIG_FILE"
+            echo "CONFIG_${opt}=y" >> "$CONFIG_FILE"
+          done
           
       - name: "😋 Add BBG Support"
         if: matrix.kernel.enable_ksu == true
@@ -381,14 +394,9 @@ jobs:
           rm -rf ./KernelSU ./drivers/kernelsu
 
           echo "📦 Installing KSU..."
+
           curl -LSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash -s
-          
-          CONFIG_FILE="arch/arm64/configs/${{ env.DEFCONFIG_NAME }}"
-          cat >> "$CONFIG_FILE" << 'EOF'
-          CONFIG_KSU=y
-          CONFIG_KSU_MANUAL_HOOK=y
-          EOF
-          
+
           echo "✔ KSU installed successfully"
           
           # Clone SUSFS4KSU for kernel patches only (not KSU integration)
@@ -503,6 +511,10 @@ jobs:
           mkdir -p fs
           cp -f susfs4ksu/kernel_patches/fs/susfs.c fs/susfs.c
           echo "✔ Copied fs/susfs.c"
+
+          # Silence clang -Werror=unused-function in SUSFS helpers
+          sed -i -E 's/^static (struct cred \*)susfs_switch_to_ksu_domain\(/static __maybe_unused \1susfs_switch_to_ksu_domain(/' fs/susfs.c
+          sed -i -E 's/^static void susfs_restore_creds\(/static void __maybe_unused susfs_restore_creds(/' fs/susfs.c
           
           # Always replace include/linux/susfs.h
           mkdir -p include/linux
@@ -579,6 +591,7 @@ jobs:
          # echo 'KBUILD_CFLAGS += -Wno-default-const-init-unsafe' >> Makefile
          # echo 'KBUILD_CFLAGS += -Wno-uninitialized-const-pointer' >> Makefile
          echo 'KBUILD_CFLAGS += -Wno-implicit-function-declaration' >> Makefile
+         echo 'KBUILD_CFLAGS += -Wno-unused-function' >> Makefile
          echo "Custom Makefile line added successfully"
 
       - name: "🔨 Build kernel"
