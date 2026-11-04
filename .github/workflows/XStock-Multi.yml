@@ -394,9 +394,14 @@ jobs:
           rm -rf ./KernelSU ./drivers/kernelsu
 
           echo "📦 Installing KSU..."
-
           curl -LSs "https://raw.githubusercontent.com/Baka-SU/BakaSU/main/kernel/setup.sh" | bash -s
-
+          
+          CONFIG_FILE="arch/arm64/configs/${{ env.DEFCONFIG_NAME }}"
+          cat >> "$CONFIG_FILE" << 'EOF'
+          CONFIG_KSU=y
+          CONFIG_KSU_MANUAL_HOOK=y
+          EOF
+          
           echo "✔ KSU installed successfully"
           
           # Clone SUSFS4KSU for kernel patches only (not KSU integration)
@@ -592,6 +597,7 @@ jobs:
          # echo 'KBUILD_CFLAGS += -Wno-uninitialized-const-pointer' >> Makefile
          echo 'KBUILD_CFLAGS += -Wno-implicit-function-declaration' >> Makefile
          echo 'KBUILD_CFLAGS += -Wno-unused-function' >> Makefile
+         echo 'KBUILD_CFLAGS += -Wno-error' >> Makefile
          echo "Custom Makefile line added successfully"
 
       - name: "🔨 Build kernel"
