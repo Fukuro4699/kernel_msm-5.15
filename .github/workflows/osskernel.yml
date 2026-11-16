@@ -570,6 +570,22 @@ jobs:
          echo 'KBUILD_CFLAGS += -Wno-error' >> Makefile
          echo "Custom Makefile line added successfully"
 
+      - name: "🧾 Update GKI modules list"
+        working-directory: ${{ env.KERNEL_LOC_DIR }}/${{ env.KERNEL_NAME }}
+        run: |
+          # This source also builds serial_num.ko and cpumaxfreq.ko, so the stock
+          # android/gki_aarch64_modules list is out of date and fails build.sh's check.
+          # Order must match the generated modules.order exactly.
+          cat > android/gki_aarch64_modules << 'EOF_MODULES'
+          mm/zsmalloc.ko
+          drivers/soc/qcom/serial_num.ko
+          drivers/block/zram/zram.ko
+          drivers/cpufreq/cpumaxfreq.ko
+          EOF_MODULES
+          # strip the YAML indentation from the heredoc body
+          sed -i 's/^[[:space:]]*//' android/gki_aarch64_modules
+          cat android/gki_aarch64_modules
+
       - name: "🔨 Build kernel"
         working-directory: ${{ env.WORK_DIR }}
         run: |
