@@ -36,7 +36,7 @@ jobs:
             dir: "sapphire_noksu"
             repo_name: "sapphire"
             repo_url: "https://github.com/The-Angel-Place-Sapphire/kernel_xiaomi_sapphire.git"
-            branch: "lineage-23.2-"
+            branch: "lineage-23.2"
             defconfig: "gki_defconfig"
             local_version: "-XStock-Sapphire"
             output_name: "Image.sapphire.noksu"
