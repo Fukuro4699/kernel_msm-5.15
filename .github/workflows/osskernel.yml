@@ -22,7 +22,7 @@ jobs:
             dir: "sapphire_ksu"
             repo_name: "sapphire"
             repo_url: "https://github.com/The-Angel-Place-Sapphire/kernel_xiaomi_sapphire.git"
-            branch: "main"
+            branch: "lineage-23.2"
             defconfig: "gki_defconfig"
             local_version: "-XStock-Sapphire"
             output_name: "Image.sapphire.ksu"
@@ -36,7 +36,7 @@ jobs:
             dir: "sapphire_noksu"
             repo_name: "sapphire"
             repo_url: "https://github.com/The-Angel-Place-Sapphire/kernel_xiaomi_sapphire.git"
-            branch: "main"
+            branch: "lineage-23.2-"
             defconfig: "gki_defconfig"
             local_version: "-XStock-Sapphire"
             output_name: "Image.sapphire.noksu"
@@ -703,7 +703,7 @@ jobs:
           📦 *Build Information:*
           • Kernel: \`Linux 5.15\`
           • Android: \`13-17\`
-          • Base: \`LineageOS 23.2 CAF (sapphire)\`
+          • Base: \`LineageOS 23.2 (sapphire)\`
           • KSU: \`BakaSU\`
           • SUSFS: \`Enabled (GKI A13-5.15)\`
           • LTO: \`Full\`
@@ -739,7 +739,7 @@ jobs:
           📦 *Build Information:*
           • Kernel: \`Linux 5.15\`
           • Android: \`13-17\`
-          • Base: \`LineageOS 23.2 CAF (sapphire)\`
+          • Base: \`LineageOS 23.2 (sapphire)\`
           • KSU: \`BakaSU\`
           • SUSFS: \`Enabled (GKI A13-5.15)\`
           • LTO: \`Full\`
