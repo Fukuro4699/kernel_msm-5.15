@@ -22,7 +22,7 @@ jobs:
             dir: "sapphire_ksu"
             repo_name: "sapphire"
             repo_url: "https://github.com/The-Angel-Place-Sapphire/kernel_xiaomi_sapphire.git"
-            branch: "lineage-23.2"
+            branch: "lineage-23.2-caf"
             defconfig: "gki_defconfig"
             local_version: "-XStock-Sapphire"
             output_name: "Image.sapphire.ksu"
@@ -36,7 +36,7 @@ jobs:
             dir: "sapphire_noksu"
             repo_name: "sapphire"
             repo_url: "https://github.com/The-Angel-Place-Sapphire/kernel_xiaomi_sapphire.git"
-            branch: "lineage-23.2"
+            branch: "lineage-23.2-caf"
             defconfig: "gki_defconfig"
             local_version: "-XStock-Sapphire"
             output_name: "Image.sapphire.noksu"
@@ -589,7 +589,6 @@ jobs:
       - name: "🔨 Build kernel"
         working-directory: ${{ env.WORK_DIR }}
         run: |
-          LTO=full \
           BUILD_CONFIG=${{ env.KERNEL_LOC_DIR }}/${{ env.KERNEL_NAME }}/build.config.gki.aarch64 \
           build/build.sh -j$(nproc --all)
           
@@ -622,6 +621,8 @@ jobs:
     name: "📦 Package Kernels"
     runs-on: ubuntu-latest
     needs: [build-kernels]
+    permissions:
+      contents: write
     steps:
       - name: "📥 Download kernel artifacts"
         uses: actions/download-artifact@v4
@@ -658,7 +659,7 @@ jobs:
           ╠═════════════════════════════════════════════════════╣
           ║                                                     ║
           ║     Features:                                       ║
-          ║     • Full LTO + -O2 Optimization                   ║
+          ║     • -O2 Optimization                              ║
           ║     • Extra TCP Congestion                          ║
           ║     • AOSP clang-r614150                            ║
           ║     • Droidspaces Support                           ║
@@ -685,9 +686,9 @@ jobs:
           echo "✅ Package created: $ZIP_NAME"
 
       - name: "⬆️ Upload to GitHub Release"
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: ${{ env.ZIP_NAME }}
           tag_name: "XStock-MULTI"
@@ -703,10 +704,9 @@ jobs:
           📦 *Build Information:*
           • Kernel: \`Linux 5.15\`
           • Android: \`13-17\`
-          • Base: \`LineageOS 23.2 (sapphire)\`
+          • Base: \`LineageOS 23.2 CAF (sapphire)\`
           • KSU: \`BakaSU\`
           • SUSFS: \`Enabled (GKI A13-5.15)\`
-          • LTO: \`Full\`
           • Optimization: \`-O2\`
           • BBG: \`Enabled\`
           • Droidspaces: \`Enabled\`
@@ -739,10 +739,9 @@ jobs:
           📦 *Build Information:*
           • Kernel: \`Linux 5.15\`
           • Android: \`13-17\`
-          • Base: \`LineageOS 23.2 (sapphire)\`
+          • Base: \`LineageOS 23.2 CAF (sapphire)\`
           • KSU: \`BakaSU\`
           • SUSFS: \`Enabled (GKI A13-5.15)\`
-          • LTO: \`Full\`
           • Optimization: \`-O2\`
           • BBG: \`Enabled\`
           • Droidspaces: \`Enabled\`
